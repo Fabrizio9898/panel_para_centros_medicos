@@ -28,11 +28,13 @@ export type AppointmentFilters = {
 
 export type PatientField = 'dni';
 
-export type DoctorService = { id: string; name: string; durationMin: number };
+export type DoctorService = { id: string; name: string; durationMin: number; active: boolean };
 
 export type DoctorOption = {
   id: string;
   name: string;
+  /** Inactivo: se muestra en filtros (tiene historial) pero no para dar turnos. */
+  active: boolean;
   specialties: string[];
   services: DoctorService[];
   /** Datos del paciente que el backend exige para reservar con este médico. */

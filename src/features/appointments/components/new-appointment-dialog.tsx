@@ -79,11 +79,11 @@ export function NewAppointmentDialog({
   }, [open, defaultDoctorId, defaultDate, today]);
 
   const bookable = useMemo(
-    () => (doctors.data ?? []).filter((d) => d.services.length > 0),
+    () => (doctors.data ?? []).filter((d) => d.active && d.services.some((s) => s.active)),
     [doctors.data]
   );
   const doctor = bookable.find((d) => d.id === doctorId) ?? null;
-  const services = useMemo(() => doctor?.services ?? [], [doctor]);
+  const services = useMemo(() => (doctor?.services ?? []).filter((s) => s.active), [doctor]);
 
   // Un solo servicio: se elige solo.
   useEffect(() => {

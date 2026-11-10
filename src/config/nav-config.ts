@@ -49,6 +49,16 @@ export const navGroups: NavGroup[] = [
         isActive: false,
         access: { permission: 'manage_team' },
         items: []
+      },
+      {
+        title: 'Configuración',
+        url: '/dashboard/configuracion',
+        icon: 'settings',
+        shortcut: ['c', 'c'],
+        isActive: false,
+        // Mismo permiso que Equipo: solo Admin.
+        access: { permission: 'manage_team' },
+        items: []
       }
     ]
   },

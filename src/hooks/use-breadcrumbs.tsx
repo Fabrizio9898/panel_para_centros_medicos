@@ -10,6 +10,7 @@ const SEGMENT_TITLES: Record<string, string> = {
   pacientes: 'Pacientes',
   ausencias: 'Ausencias',
   equipo: 'Equipo',
+  configuracion: 'Configuración',
   profile: 'Perfil'
 };
 

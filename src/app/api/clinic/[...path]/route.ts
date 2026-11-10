@@ -9,6 +9,15 @@ const ALLOWED: { method: string; pattern: RegExp }[] = [
   { method: 'POST', pattern: /^admin\/team\/invitations$/ },
   { method: 'DELETE', pattern: new RegExp(`^admin\\/team\\/invitations\\/${UUID}$`) },
   { method: 'DELETE', pattern: new RegExp(`^admin\\/team\\/members\\/${UUID}$`) },
+  { method: 'GET', pattern: /^admin\/config\/(specialties|doctors)$/ },
+  { method: 'POST', pattern: /^admin\/config\/(specialties|doctors)$/ },
+  {
+    method: 'PATCH',
+    pattern: new RegExp(`^admin\\/config\\/(specialties|doctors|services)\\/${UUID}$`)
+  },
+  { method: 'DELETE', pattern: new RegExp(`^admin\\/config\\/specialties\\/${UUID}$`) },
+  { method: 'POST', pattern: new RegExp(`^admin\\/config\\/doctors\\/${UUID}\\/services$`) },
+  { method: 'PUT', pattern: new RegExp(`^admin\\/config\\/doctors\\/${UUID}\\/schedule$`) },
   { method: 'GET', pattern: /^admin\/appointments$/ },
   { method: 'POST', pattern: /^admin\/appointments$/ },
   { method: 'GET', pattern: /^admin\/patients$/ },
@@ -50,4 +59,4 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
   });
 }
 
-export { handle as DELETE, handle as GET, handle as PATCH, handle as POST };
+export { handle as DELETE, handle as GET, handle as PATCH, handle as POST, handle as PUT };
