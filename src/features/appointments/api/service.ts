@@ -3,11 +3,14 @@ import type {
   Appointment,
   AppointmentFilters,
   AppointmentStatusUpdate,
+  CreateAppointmentPayload,
   CreateTimeOffPayload,
   CreateTimeOffResponse,
+  DaySlots,
   DoctorOption,
   Patient,
   PatientHistory,
+  PatientPayload,
   TimeOff
 } from './types';
 
@@ -30,8 +33,35 @@ export async function updateAppointmentStatus(id: string, status: AppointmentSta
   });
 }
 
+export async function createAppointment(payload: CreateAppointmentPayload) {
+  return apiClient<Appointment>('/clinic/admin/appointments', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
 export async function getDoctors() {
   return apiClient<DoctorOption[]>('/clinic/admin/doctors');
+}
+
+export async function getDoctorSlots(doctorId: string, serviceId: string, date: string) {
+  return apiClient<DaySlots>(
+    `/clinic/admin/doctors/${doctorId}/slots?${query({ serviceId, date })}`
+  );
+}
+
+export async function createPatient(payload: PatientPayload) {
+  return apiClient<Patient>('/clinic/admin/patients', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function updatePatient(id: string, payload: PatientPayload) {
+  return apiClient<Patient>(`/clinic/admin/patients/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
 }
 
 export async function searchPatients(q: string) {

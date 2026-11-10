@@ -18,12 +18,14 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { appointmentsQueryOptions } from '@/features/appointments/api/queries';
+import { NewAppointmentDialog } from '@/features/appointments/components/new-appointment-dialog';
 import { StatusBadge } from '@/features/appointments/components/status-badge';
 import { todayLocal } from '@/features/appointments/date-utils';
 
 export function Overview() {
   // Reloj que se actualiza cada minuto: "hoy" y "ahora" no quedan congelados.
   const [now, setNow] = useState(() => Date.now());
+  const [newOpen, setNewOpen] = useState(false);
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 60_000);
     return () => clearInterval(id);
@@ -126,6 +128,10 @@ export function Overview() {
 
         <div className='flex flex-col gap-2'>
           <h2 className='text-sm font-medium'>Accesos rápidos</h2>
+          <Button className='justify-start' onClick={() => setNewOpen(true)}>
+            <Icons.add className='mr-2 h-4 w-4' /> Nuevo turno
+          </Button>
+          <NewAppointmentDialog open={newOpen} onOpenChange={setNewOpen} />
           <Button
             variant='outline'
             className='justify-start'

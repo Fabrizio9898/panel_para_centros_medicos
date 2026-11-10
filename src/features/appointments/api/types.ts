@@ -26,7 +26,32 @@ export type AppointmentFilters = {
   status?: string | null;
 };
 
-export type DoctorOption = { id: string; name: string };
+export type PatientField = 'dni';
+
+export type DoctorService = { id: string; name: string; durationMin: number };
+
+export type DoctorOption = {
+  id: string;
+  name: string;
+  specialties: string[];
+  services: DoctorService[];
+  /** Datos del paciente que el backend exige para reservar con este médico. */
+  patientRequiredFields: PatientField[];
+};
+
+export type Slot = { start: string; end: string; startUtc: string; endUtc: string };
+
+export type DaySlots = { date: string; doctorId: string; serviceId: string; slots: Slot[] };
+
+export type CreateAppointmentPayload = {
+  doctorId: string;
+  patientId: string;
+  serviceId: string;
+  startsAt: string;
+  notes?: string;
+};
+
+export type PatientPayload = { name: string; phone: string; dni?: string | null };
 
 export type Patient = {
   id: string;

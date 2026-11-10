@@ -30,6 +30,7 @@ import {
   patientSearchQueryOptions
 } from '@/features/appointments/api/queries';
 import type { Patient } from '@/features/appointments/api/types';
+import { PatientFormDialog } from './patient-form-dialog';
 
 export function PatientSearch() {
   const [q, setQ] = useState('');
@@ -37,19 +38,25 @@ export function PatientSearch() {
   const enabled = debounced.length >= 2;
   const search = useQuery(patientSearchQueryOptions(debounced));
   const [selected, setSelected] = useState<Patient | null>(null);
+  const [editing, setEditing] = useState<{ patient: Patient | null } | null>(null);
   const rows = search.data ?? [];
 
   return (
     <div className='flex flex-1 flex-col gap-4'>
-      <div className='relative max-w-md'>
-        <Icons.search className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2' />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder='Buscar por nombre, teléfono o DNI'
-          aria-label='Buscar paciente'
-          className='pl-8'
-        />
+      <div className='flex flex-wrap items-center gap-2'>
+        <div className='relative w-full max-w-md'>
+          <Icons.search className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2' />
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder='Buscar por nombre, teléfono o DNI'
+            aria-label='Buscar paciente'
+            className='pl-8'
+          />
+        </div>
+        <Button className='ml-auto' onClick={() => setEditing({ patient: null })}>
+          <Icons.add className='mr-1 h-4 w-4' /> Nuevo paciente
+        </Button>
       </div>
 
       {!enabled ? (
@@ -98,9 +105,19 @@ export function PatientSearch() {
                   <TableCell>{patient.phone}</TableCell>
                   <TableCell>{patient.dni ?? '—'}</TableCell>
                   <TableCell>
-                    <Button variant='outline' size='sm' onClick={() => setSelected(patient)}>
-                      Ver historial
-                    </Button>
+                    <div className='flex justify-end gap-2'>
+                      <Button
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => setEditing({ patient })}
+                        aria-label={`Editar ${patient.name}`}
+                      >
+                        <Icons.edit className='h-4 w-4' />
+                      </Button>
+                      <Button variant='outline' size='sm' onClick={() => setSelected(patient)}>
+                        Ver historial
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
@@ -110,6 +127,15 @@ export function PatientSearch() {
       )}
 
       <PatientHistoryDialog patient={selected} onClose={() => setSelected(null)} />
+      <PatientFormDialog
+        open={!!editing}
+        onOpenChange={(next) => !next && setEditing(null)}
+        patient={editing?.patient}
+        initialQuery={editing?.patient ? undefined : q}
+        onSaved={(patient) => {
+          if (!editing?.patient) setQ(patient.name);
+        }}
+      />
     </div>
   );
 }

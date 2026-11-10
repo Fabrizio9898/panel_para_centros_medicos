@@ -39,6 +39,7 @@ import { appointmentsQueryOptions, doctorsQueryOptions } from '../api/queries';
 import type { Appointment } from '../api/types';
 import { CLOSED_STATUSES, STATUS_OPTIONS } from '../constants';
 import { addDaysLocal, rangeFor, todayLocal } from '../date-utils';
+import { NewAppointmentDialog } from './new-appointment-dialog';
 import { StatusBadge } from './status-badge';
 
 export function AppointmentsBoard() {
@@ -61,6 +62,7 @@ export function AppointmentsBoard() {
   );
   const doctors = useQuery(doctorsQueryOptions());
   const rows = appointments.data ?? [];
+  const [newOpen, setNewOpen] = useState(false);
 
   const dateLabel =
     view === 'week'
@@ -118,6 +120,10 @@ export function AppointmentsBoard() {
         </div>
 
         <Select
+          items={[
+            { value: 'all', label: 'Todos los médicos' },
+            ...(doctors.data ?? []).map((doctor) => ({ value: doctor.id, label: doctor.name }))
+          ]}
           value={filters.doctorId ?? 'all'}
           onValueChange={(value) =>
             setFilters({ doctorId: !value || value === 'all' ? null : value })
@@ -137,6 +143,7 @@ export function AppointmentsBoard() {
         </Select>
 
         <Select
+          items={[{ value: 'all', label: 'Todos los estados' }, ...STATUS_OPTIONS]}
           value={filters.status ?? 'all'}
           onValueChange={(value) =>
             setFilters({ status: !value || value === 'all' ? null : value })
@@ -159,7 +166,17 @@ export function AppointmentsBoard() {
           Hoy
         </Button>
         <span className='text-muted-foreground ml-auto text-sm capitalize'>{dateLabel}</span>
+        <Button size='sm' onClick={() => setNewOpen(true)}>
+          <Icons.add className='mr-1 h-4 w-4' /> Nuevo turno
+        </Button>
       </div>
+
+      <NewAppointmentDialog
+        open={newOpen}
+        onOpenChange={setNewOpen}
+        defaultDoctorId={filters.doctorId}
+        defaultDate={view === 'day' ? filters.date : undefined}
+      />
 
       {appointments.isLoading ? (
         <div className='space-y-2 rounded-lg border p-4'>

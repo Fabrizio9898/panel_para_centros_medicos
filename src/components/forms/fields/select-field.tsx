@@ -32,6 +32,7 @@ export function SelectField({
       </FieldLabel>
       <Select
         name={field.name}
+        items={options}
         value={field.state.value}
         onValueChange={(value) => field.handleChange(value ?? '')}
       >

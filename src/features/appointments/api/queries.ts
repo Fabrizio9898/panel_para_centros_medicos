@@ -2,6 +2,7 @@ import { queryOptions } from '@tanstack/react-query';
 import {
   getAppointments,
   getDoctors,
+  getDoctorSlots,
   getPatientHistory,
   getTimeOffs,
   searchPatients
@@ -39,6 +40,20 @@ export const doctorsQueryOptions = () =>
     queryKey: doctorsKeys.all,
     queryFn: getDoctors,
     staleTime: 5 * 60 * 1000
+  });
+
+export const slotKeys = {
+  all: ['slots'] as const,
+  day: (doctorId: string, serviceId: string, date: string) =>
+    [...slotKeys.all, doctorId, serviceId, date] as const
+};
+
+export const slotsQueryOptions = (doctorId: string, serviceId: string, date: string) =>
+  queryOptions({
+    queryKey: slotKeys.day(doctorId, serviceId, date),
+    queryFn: () => getDoctorSlots(doctorId, serviceId, date),
+    enabled: !!doctorId && !!serviceId && !!date,
+    staleTime: 0
   });
 
 export const patientSearchQueryOptions = (q: string) =>
