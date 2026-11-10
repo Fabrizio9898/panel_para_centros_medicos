@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
+import { QueryError } from '@/components/feedback/query-error';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -27,12 +28,9 @@ import {
   TableRow
 } from '@/components/ui/table';
 import { useAppForm } from '@/lib/form';
-import {
-  doctorsQueryOptions,
-  timeOffsQueryOptions
-} from '@/features/appointments/api/queries';
+import { doctorsQueryOptions, timeOffsQueryOptions } from '@/features/appointments/api/queries';
 import type { TimeOff } from '@/features/appointments/api/types';
-import { addDaysLocal, todayLocal } from '@/features/appointments/date-utils';
+import { addDaysLocal, clinicLocalToIso, todayLocal } from '@/features/appointments/date-utils';
 import { useCreateTimeOff, useDeleteTimeOff } from '@/features/appointments/api/mutations';
 
 const timeOffSchema = z
@@ -42,10 +40,17 @@ const timeOffSchema = z
     endsAt: z.string().min(1, 'Indicá el fin'),
     reason: z.string().optional()
   })
-  .refine((value) => new Date(value.endsAt) > new Date(value.startsAt), {
-    message: 'El fin tiene que ser posterior al inicio',
-    path: ['endsAt']
-  });
+  .refine(
+    (value) => {
+      const start = clinicLocalToIso(value.startsAt);
+      const end = clinicLocalToIso(value.endsAt);
+      return !start || !end || end > start;
+    },
+    {
+      message: 'El fin tiene que ser posterior al inicio',
+      path: ['endsAt']
+    }
+  );
 
 type TimeOffFormValues = z.infer<typeof timeOffSchema>;
 
@@ -73,9 +78,11 @@ export function TimeOffsBoard() {
           ))}
         </div>
       ) : timeOffs.isError ? (
-        <p className='text-muted-foreground rounded-lg border p-8 text-center text-sm'>
-          No se pudieron cargar las ausencias.
-        </p>
+        <QueryError
+          error={timeOffs.error}
+          onRetry={() => void timeOffs.refetch()}
+          message='No se pudieron cargar las ausencias.'
+        />
       ) : rows.length === 0 ? (
         <Empty className='border'>
           <EmptyHeader>
@@ -167,8 +174,8 @@ function NewTimeOffDialog({
     onSubmit: async ({ value }) => {
       await create.mutateAsync({
         doctorId: value.doctorId,
-        startsAt: new Date(value.startsAt).toISOString(),
-        endsAt: new Date(value.endsAt).toISOString(),
+        startsAt: clinicLocalToIso(value.startsAt) ?? value.startsAt,
+        endsAt: clinicLocalToIso(value.endsAt) ?? value.endsAt,
         reason: value.reason || undefined
       });
       form.reset();
@@ -205,23 +212,25 @@ function NewTimeOffDialog({
                 />
               )}
             />
+            {doctors.isError && (
+              <p role='alert' className='text-destructive text-sm'>
+                No se pudieron cargar los médicos.{' '}
+                <button type='button' className='underline' onClick={() => void doctors.refetch()}>
+                  Reintentar
+                </button>
+              </p>
+            )}
             <form.AppField
               name='startsAt'
-              children={(field) => (
-                <field.TextField label='Desde' required type='datetime-local' />
-              )}
+              children={(field) => <field.TextField label='Desde' required type='datetime-local' />}
             />
             <form.AppField
               name='endsAt'
-              children={(field) => (
-                <field.TextField label='Hasta' required type='datetime-local' />
-              )}
+              children={(field) => <field.TextField label='Hasta' required type='datetime-local' />}
             />
             <form.AppField
               name='reason'
-              children={(field) => (
-                <field.TextField label='Motivo' placeholder='Vacaciones' />
-              )}
+              children={(field) => <field.TextField label='Motivo' placeholder='Vacaciones' />}
             />
           </FieldGroup>
         </form>

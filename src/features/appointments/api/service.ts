@@ -2,8 +2,9 @@ import { apiClient } from '@/lib/api-client';
 import type {
   Appointment,
   AppointmentFilters,
-  AppointmentStatus,
+  AppointmentStatusUpdate,
   CreateTimeOffPayload,
+  CreateTimeOffResponse,
   DoctorOption,
   Patient,
   PatientHistory,
@@ -19,12 +20,10 @@ function query(params: Record<string, string | null | undefined>) {
 }
 
 export async function getAppointments(filters: AppointmentFilters) {
-  return apiClient<Appointment[]>(
-    `/clinic/admin/appointments?${query({ ...filters })}`
-  );
+  return apiClient<Appointment[]>(`/clinic/admin/appointments?${query({ ...filters })}`);
 }
 
-export async function updateAppointmentStatus(id: string, status: AppointmentStatus) {
+export async function updateAppointmentStatus(id: string, status: AppointmentStatusUpdate) {
   return apiClient<Appointment>(`/clinic/admin/appointments/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status })
@@ -48,7 +47,7 @@ export async function getTimeOffs(from: string, to: string) {
 }
 
 export async function createTimeOff(payload: CreateTimeOffPayload) {
-  return apiClient<TimeOff>('/clinic/admin/time-offs', {
+  return apiClient<CreateTimeOffResponse>('/clinic/admin/time-offs', {
     method: 'POST',
     body: JSON.stringify(payload)
   });

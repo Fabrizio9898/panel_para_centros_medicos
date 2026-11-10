@@ -11,14 +11,15 @@ const ALLOWED: { method: string; pattern: RegExp }[] = [
   { method: 'GET', pattern: /^admin\/time-offs$/ },
   { method: 'POST', pattern: /^admin\/time-offs$/ },
   { method: 'DELETE', pattern: new RegExp(`^admin\\/time-offs\\/${UUID}$`) },
-  { method: 'PATCH', pattern: new RegExp(`^admin\\/appointments\\/${UUID}\\/status$`) },
-  { method: 'GET', pattern: /^users\/me$/ }
+  { method: 'PATCH', pattern: new RegExp(`^admin\\/appointments\\/${UUID}\\/status$`) }
 ];
 
 async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {
   const { path } = await ctx.params;
   const target = path.join('/');
-  const allowed = ALLOWED.some((route) => route.method === req.method && route.pattern.test(target));
+  const allowed = ALLOWED.some(
+    (route) => route.method === req.method && route.pattern.test(target)
+  );
   if (!allowed) {
     return Response.json({ message: 'No encontrado' }, { status: 404 });
   }
@@ -29,6 +30,10 @@ async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] 
     method: req.method,
     body: body || undefined
   });
+
+  if (upstream.status === 204 || upstream.status === 304) {
+    return new Response(null, { status: upstream.status });
+  }
 
   return new Response(await upstream.text(), {
     status: upstream.status,

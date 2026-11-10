@@ -1,7 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import Link from 'next/link';
+import { QueryError } from '@/components/feedback/query-error';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,11 +22,24 @@ import { StatusBadge } from '@/features/appointments/components/status-badge';
 import { todayLocal } from '@/features/appointments/date-utils';
 
 export function Overview() {
+  // Reloj que se actualiza cada minuto: "hoy" y "ahora" no quedan congelados.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
   const today = todayLocal();
-  const appointments = useQuery(appointmentsQueryOptions({ from: today, to: today }));
+  const appointments = useQuery({
+    ...appointmentsQueryOptions({ from: today, to: today }),
+    refetchInterval: 60_000
+  });
 
   const data = appointments.data ?? [];
-  const active = data.filter((a) => a.status === 'pending' || a.status === 'confirmed');
+  const notCancelled = data.filter((a) => a.status !== 'cancelled');
+  const upcoming = data.filter(
+    (a) =>
+      (a.status === 'pending' || a.status === 'confirmed') && new Date(a.startsAt).getTime() >= now
+  );
   const pending = data.filter((a) => a.status === 'pending');
   const attended = data.filter((a) => a.status === 'attended');
   const noShow = data.filter((a) => a.status === 'no_show');
@@ -32,8 +47,12 @@ export function Overview() {
   return (
     <div className='flex flex-1 flex-col gap-4'>
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-        <Kpi label='Turnos de hoy' value={data.length} loading={appointments.isLoading} />
-        <Kpi label='Pendientes de confirmar' value={pending.length} loading={appointments.isLoading} />
+        <Kpi label='Turnos de hoy' value={notCancelled.length} loading={appointments.isLoading} />
+        <Kpi
+          label='Pendientes de confirmar'
+          value={pending.length}
+          loading={appointments.isLoading}
+        />
         <Kpi label='Asistieron' value={attended.length} loading={appointments.isLoading} />
         <Kpi label='No vinieron' value={noShow.length} loading={appointments.isLoading} />
       </div>
@@ -45,6 +64,7 @@ export function Overview() {
             <Button
               variant='ghost'
               size='sm'
+              nativeButton={false}
               render={<Link href='/dashboard/turnos' aria-label='Ver agenda' />}
             >
               Ver agenda <Icons.arrowRight className='ml-1 h-4 w-4' />
@@ -58,10 +78,12 @@ export function Overview() {
               ))}
             </div>
           ) : appointments.isError ? (
-            <p className='text-muted-foreground rounded-lg border p-8 text-center text-sm'>
-              No se pudieron cargar los turnos de hoy.
-            </p>
-          ) : active.length === 0 ? (
+            <QueryError
+              error={appointments.error}
+              onRetry={() => void appointments.refetch()}
+              message='No se pudieron cargar los turnos de hoy.'
+            />
+          ) : upcoming.length === 0 ? (
             <Empty className='border'>
               <EmptyHeader>
                 <EmptyTitle>Sin turnos pendientes</EmptyTitle>
@@ -83,7 +105,7 @@ export function Overview() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {active.slice(0, 8).map((appointment) => (
+                  {upcoming.slice(0, 8).map((appointment) => (
                     <TableRow key={appointment.id}>
                       <TableCell className='font-medium tabular-nums'>
                         {appointment.localTime}
@@ -107,6 +129,7 @@ export function Overview() {
           <Button
             variant='outline'
             className='justify-start'
+            nativeButton={false}
             render={<Link href='/dashboard/turnos' aria-label='Ver turnos' />}
           >
             <Icons.calendar className='mr-2 h-4 w-4' /> Ver turnos del día y la semana
@@ -114,6 +137,7 @@ export function Overview() {
           <Button
             variant='outline'
             className='justify-start'
+            nativeButton={false}
             render={<Link href='/dashboard/pacientes' aria-label='Buscar un paciente' />}
           >
             <Icons.search className='mr-2 h-4 w-4' /> Buscar un paciente
@@ -121,6 +145,7 @@ export function Overview() {
           <Button
             variant='outline'
             className='justify-start'
+            nativeButton={false}
             render={<Link href='/dashboard/ausencias' aria-label='Cargar una ausencia' />}
           >
             <Icons.clock className='mr-2 h-4 w-4' /> Cargar una ausencia
@@ -131,15 +156,7 @@ export function Overview() {
   );
 }
 
-function Kpi({
-  label,
-  value,
-  loading
-}: {
-  label: string;
-  value: number;
-  loading: boolean;
-}) {
+function Kpi({ label, value, loading }: { label: string; value: number; loading: boolean }) {
   return (
     <Card>
       <CardHeader>

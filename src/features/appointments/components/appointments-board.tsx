@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { parseAsString, useQueryStates } from 'nuqs';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { QueryError } from '@/components/feedback/query-error';
 import { AlertModal } from '@/components/modal/alert-modal';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -167,12 +168,11 @@ export function AppointmentsBoard() {
           ))}
         </div>
       ) : appointments.isError ? (
-        <div className='flex flex-col items-center gap-3 rounded-lg border p-8 text-center'>
-          <p className='text-muted-foreground text-sm'>No se pudieron cargar los turnos.</p>
-          <Button variant='outline' size='sm' onClick={() => void appointments.refetch()}>
-            Reintentar
-          </Button>
-        </div>
+        <QueryError
+          error={appointments.error}
+          onRetry={() => void appointments.refetch()}
+          message='No se pudieron cargar los turnos.'
+        />
       ) : rows.length === 0 ? (
         <Empty className='border'>
           <EmptyHeader>

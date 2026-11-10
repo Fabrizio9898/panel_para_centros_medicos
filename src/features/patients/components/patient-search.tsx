@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { QueryError } from '@/components/feedback/query-error';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
 import {
@@ -67,9 +68,11 @@ export function PatientSearch() {
           ))}
         </div>
       ) : search.isError ? (
-        <p className='text-muted-foreground rounded-lg border p-8 text-center text-sm'>
-          No se pudo buscar. Reintentá en unos segundos.
-        </p>
+        <QueryError
+          error={search.error}
+          onRetry={() => void search.refetch()}
+          message='No se pudo buscar.'
+        />
       ) : rows.length === 0 ? (
         <Empty className='border'>
           <EmptyHeader>
@@ -139,7 +142,11 @@ function PatientHistoryDialog({
               ))}
             </div>
           ) : history.isError ? (
-            <p className='text-muted-foreground text-sm'>No se pudo cargar el historial.</p>
+            <QueryError
+              error={history.error}
+              onRetry={() => void history.refetch()}
+              message='No se pudo cargar el historial.'
+            />
           ) : history.data && history.data.appointments.length > 0 ? (
             <Table>
               <TableHeader>

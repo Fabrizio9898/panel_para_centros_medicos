@@ -14,6 +14,11 @@ export type Appointment = {
   service: { id: string; name: string; durationMin: number };
 };
 
+export type AppointmentStatusUpdate = Extract<
+  AppointmentStatus,
+  'attended' | 'no_show' | 'cancelled'
+>;
+
 export type AppointmentFilters = {
   from: string;
   to: string;
@@ -54,3 +59,5 @@ export type CreateTimeOffPayload = {
   endsAt: string;
   reason?: string;
 };
+
+export type CreateTimeOffResponse = TimeOff & { affectedAppointments: number };
