@@ -16,6 +16,8 @@ Ensure these are set in your deployment platform:
 
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
 - `CLERK_SECRET_KEY`
+- `API_URL` — server-only URL of clinic-backend, ending in `/api/v1` (for example
+  `https://turnos.example.com/api/v1`). Never prefix it with `NEXT_PUBLIC_`.
 - All `NEXT_PUBLIC_*` variables for client-side access
 
 

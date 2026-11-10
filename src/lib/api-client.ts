@@ -10,5 +10,6 @@ export async function apiClient<T>(endpoint: string, options?: RequestInit): Pro
     throw new Error(`API error: ${res.status} ${res.statusText}`);
   }
 
-  return res.json() as Promise<T>;
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

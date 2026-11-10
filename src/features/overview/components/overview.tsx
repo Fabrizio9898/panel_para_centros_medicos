@@ -1,138 +1,153 @@
-import PageContainer from '@/components/layout/page-container';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-  CardAction
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AreaGraph } from './area-graph';
-import { BarGraph } from './bar-graph';
-import { PieGraph } from './pie-graph';
-import { RecentSales } from './recent-sales';
-import { Icons } from '@/components/icons';
-import { Badge } from '@/components/ui/badge';
+'use client';
 
-export default function OverViewPage() {
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { Icons } from '@/components/icons';
+import { Button } from '@/components/ui/button';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import { appointmentsQueryOptions } from '@/features/appointments/api/queries';
+import { StatusBadge } from '@/features/appointments/components/status-badge';
+import { todayLocal } from '@/features/appointments/date-utils';
+
+export function Overview() {
+  const today = todayLocal();
+  const appointments = useQuery(appointmentsQueryOptions({ from: today, to: today }));
+
+  const data = appointments.data ?? [];
+  const active = data.filter((a) => a.status === 'pending' || a.status === 'confirmed');
+  const pending = data.filter((a) => a.status === 'pending');
+  const attended = data.filter((a) => a.status === 'attended');
+  const noShow = data.filter((a) => a.status === 'no_show');
+
   return (
-    <PageContainer>
-      <div className='flex flex-1 flex-col space-y-2'>
-        <div className='flex items-center justify-between space-y-2'>
-          <h2 className='text-2xl font-bold tracking-tight'>Hi, Welcome back 👋</h2>
-          <div className='hidden items-center space-x-2 md:flex'>
-            <Button>Download</Button>
-          </div>
-        </div>
-        <Tabs defaultValue='overview' className='space-y-4'>
-          <TabsList>
-            <TabsTrigger value='overview'>Overview</TabsTrigger>
-            <TabsTrigger value='analytics' disabled>
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value='overview' className='space-y-4'>
-            <div className='*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4'>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>Total Revenue</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    $1,250.00
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <Icons.trendingUp />
-                      +12.5%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Trending up this month <Icons.trendingUp className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>Visitors for the last 6 months</div>
-                </CardFooter>
-              </Card>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>New Customers</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    1,234
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <Icons.trendingDown />
-                      -20%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Down 20% this period <Icons.trendingDown className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>Acquisition needs attention</div>
-                </CardFooter>
-              </Card>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>Active Accounts</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    45,678
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <Icons.trendingUp />
-                      +12.5%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Strong user retention <Icons.trendingUp className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>Engagement exceed targets</div>
-                </CardFooter>
-              </Card>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>Growth Rate</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    4.5%
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <Icons.trendingUp />
-                      +4.5%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Steady performance increase <Icons.trendingUp className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>Meets growth projections</div>
-                </CardFooter>
-              </Card>
-            </div>
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7'>
-              <div className='col-span-4'>
-                <BarGraph />
-              </div>
-              <Card className='col-span-4 md:col-span-3'>
-                <RecentSales />
-              </Card>
-              <div className='col-span-4'>
-                <AreaGraph />
-              </div>
-              <div className='col-span-4 md:col-span-3'>
-                <PieGraph />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+    <div className='flex flex-1 flex-col gap-4'>
+      <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+        <Kpi label='Turnos de hoy' value={data.length} loading={appointments.isLoading} />
+        <Kpi label='Pendientes de confirmar' value={pending.length} loading={appointments.isLoading} />
+        <Kpi label='Asistieron' value={attended.length} loading={appointments.isLoading} />
+        <Kpi label='No vinieron' value={noShow.length} loading={appointments.isLoading} />
       </div>
-    </PageContainer>
+
+      <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
+        <div className='flex flex-col gap-3 lg:col-span-2'>
+          <div className='flex items-center justify-between'>
+            <h2 className='text-sm font-medium'>Próximos turnos de hoy</h2>
+            <Button
+              variant='ghost'
+              size='sm'
+              render={<Link href='/dashboard/turnos' aria-label='Ver agenda' />}
+            >
+              Ver agenda <Icons.arrowRight className='ml-1 h-4 w-4' />
+            </Button>
+          </div>
+
+          {appointments.isLoading ? (
+            <div className='space-y-2 rounded-lg border p-4'>
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className='h-9 w-full' />
+              ))}
+            </div>
+          ) : appointments.isError ? (
+            <p className='text-muted-foreground rounded-lg border p-8 text-center text-sm'>
+              No se pudieron cargar los turnos de hoy.
+            </p>
+          ) : active.length === 0 ? (
+            <Empty className='border'>
+              <EmptyHeader>
+                <EmptyTitle>Sin turnos pendientes</EmptyTitle>
+                <EmptyDescription>
+                  Cuando un paciente saque un turno por WhatsApp, aparece acá.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <div className='overflow-x-auto rounded-lg border'>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Hora</TableHead>
+                    <TableHead>Paciente</TableHead>
+                    <TableHead>Médico</TableHead>
+                    <TableHead>Servicio</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {active.slice(0, 8).map((appointment) => (
+                    <TableRow key={appointment.id}>
+                      <TableCell className='font-medium tabular-nums'>
+                        {appointment.localTime}
+                      </TableCell>
+                      <TableCell>{appointment.patient.name}</TableCell>
+                      <TableCell>{appointment.doctor.name}</TableCell>
+                      <TableCell>{appointment.service.name}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={appointment.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+
+        <div className='flex flex-col gap-2'>
+          <h2 className='text-sm font-medium'>Accesos rápidos</h2>
+          <Button
+            variant='outline'
+            className='justify-start'
+            render={<Link href='/dashboard/turnos' aria-label='Ver turnos' />}
+          >
+            <Icons.calendar className='mr-2 h-4 w-4' /> Ver turnos del día y la semana
+          </Button>
+          <Button
+            variant='outline'
+            className='justify-start'
+            render={<Link href='/dashboard/pacientes' aria-label='Buscar un paciente' />}
+          >
+            <Icons.search className='mr-2 h-4 w-4' /> Buscar un paciente
+          </Button>
+          <Button
+            variant='outline'
+            className='justify-start'
+            render={<Link href='/dashboard/ausencias' aria-label='Cargar una ausencia' />}
+          >
+            <Icons.clock className='mr-2 h-4 w-4' /> Cargar una ausencia
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Kpi({
+  label,
+  value,
+  loading
+}: {
+  label: string;
+  value: number;
+  loading: boolean;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className='text-2xl font-semibold tabular-nums'>
+          {loading ? <Skeleton className='h-7 w-10' /> : value}
+        </CardTitle>
+      </CardHeader>
+    </Card>
   );
 }

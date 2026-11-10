@@ -142,18 +142,14 @@ export default function AppSidebar() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
                     <Icons.account className='mr-2 h-4 w-4' />
-                    Profile
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push('/dashboard/notifications')}>
-                    <Icons.notification className='mr-2 h-4 w-4' />
-                    Notifications
+                    Perfil
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => signOut({ redirectUrl: '/auth/sign-in' })}>
                     <Icons.logout aria-hidden className='mr-2 h-4 w-4' />
-                    Sign out
+                    Cerrar sesión
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>

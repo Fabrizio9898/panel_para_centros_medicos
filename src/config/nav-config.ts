@@ -7,37 +7,37 @@ import { NavGroup } from '@/types';
  */
 export const navGroups: NavGroup[] = [
   {
-    label: 'Overview',
+    label: 'Clínica',
     items: [
       {
-        title: 'Dashboard',
+        title: 'Inicio',
         url: '/dashboard/overview',
         icon: 'dashboard',
         isActive: false,
-        shortcut: ['d', 'd'],
+        shortcut: ['i', 'i'],
         items: []
       },
       {
-        title: 'Product',
-        url: '/dashboard/product',
-        icon: 'product',
+        title: 'Turnos',
+        url: '/dashboard/turnos',
+        icon: 'calendar',
+        shortcut: ['t', 't'],
+        isActive: false,
+        items: []
+      },
+      {
+        title: 'Pacientes',
+        url: '/dashboard/pacientes',
+        icon: 'teams',
         shortcut: ['p', 'p'],
         isActive: false,
         items: []
       },
       {
-        title: 'Users',
-        url: '/dashboard/users',
-        icon: 'teams',
-        shortcut: ['u', 'u'],
-        isActive: false,
-        items: []
-      },
-      {
-        title: 'AI Chat',
-        url: '/dashboard/ai-chat',
-        icon: 'sparkles',
-        shortcut: ['a', 'i'],
+        title: 'Ausencias',
+        url: '/dashboard/ausencias',
+        icon: 'clock',
+        shortcut: ['a', 'a'],
         isActive: false,
         items: []
       }
@@ -47,28 +47,16 @@ export const navGroups: NavGroup[] = [
     label: '',
     items: [
       {
-        title: 'Account',
+        title: 'Cuenta',
         url: '#',
         icon: 'account',
         isActive: true,
         items: [
           {
-            title: 'Profile',
+            title: 'Perfil',
             url: '/dashboard/profile',
             icon: 'profile',
             shortcut: ['m', 'm']
-          },
-          {
-            title: 'Notifications',
-            url: '/dashboard/notifications',
-            icon: 'notification',
-            shortcut: ['n', 'n']
-          },
-          {
-            title: 'Login',
-            shortcut: ['l', 'l'],
-            url: '/',
-            icon: 'login'
           }
         ]
       }
