@@ -64,8 +64,11 @@ export async function updatePatient(id: string, payload: PatientPayload) {
   });
 }
 
-export async function searchPatients(q: string) {
-  return apiClient<Patient[]>(`/clinic/admin/patients?${query({ q })}`);
+/** `q` vacío trae todos (ordenados por nombre), hasta `limit`. */
+export async function searchPatients(q: string, limit?: number) {
+  return apiClient<Patient[]>(
+    `/clinic/admin/patients?${query({ q, limit: limit ? String(limit) : undefined })}`
+  );
 }
 
 export async function getPatientHistory(id: string) {

@@ -27,16 +27,18 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { StatusBadge } from '@/features/appointments/components/status-badge';
 import {
   patientHistoryQueryOptions,
-  patientSearchQueryOptions
+  patientListQueryOptions
 } from '@/features/appointments/api/queries';
 import type { Patient } from '@/features/appointments/api/types';
 import { PatientFormDialog } from './patient-form-dialog';
 
+const PAGE = 50;
+
 export function PatientSearch() {
   const [q, setQ] = useState('');
   const debounced = useDebounce(q.trim(), 300);
-  const enabled = debounced.length >= 2;
-  const search = useQuery(patientSearchQueryOptions(debounced));
+  const [limit, setLimit] = useState(PAGE);
+  const search = useQuery(patientListQueryOptions(debounced, limit));
   const [selected, setSelected] = useState<Patient | null>(null);
   const [editing, setEditing] = useState<{ patient: Patient | null } | null>(null);
   const rows = search.data ?? [];
@@ -48,8 +50,11 @@ export function PatientSearch() {
           <Icons.search className='text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 h-4 w-4 -translate-y-1/2' />
           <Input
             value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder='Buscar por nombre, teléfono o DNI'
+            onChange={(e) => {
+              setQ(e.target.value);
+              setLimit(PAGE);
+            }}
+            placeholder='Filtrar por nombre, teléfono o DNI'
             aria-label='Buscar paciente'
             className='pl-8'
           />
@@ -59,16 +64,7 @@ export function PatientSearch() {
         </Button>
       </div>
 
-      {!enabled ? (
-        <Empty className='border'>
-          <EmptyHeader>
-            <EmptyTitle>Buscar un paciente</EmptyTitle>
-            <EmptyDescription>
-              Escribí al menos 2 caracteres del nombre, teléfono o DNI.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : search.isLoading ? (
+      {search.isLoading ? (
         <div className='space-y-2 rounded-lg border p-4'>
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} className='h-10 w-full' />
@@ -83,8 +79,12 @@ export function PatientSearch() {
       ) : rows.length === 0 ? (
         <Empty className='border'>
           <EmptyHeader>
-            <EmptyTitle>Sin resultados</EmptyTitle>
-            <EmptyDescription>No encontramos pacientes con ese dato.</EmptyDescription>
+            <EmptyTitle>{debounced ? 'Sin resultados' : 'Todavía no hay pacientes'}</EmptyTitle>
+            <EmptyDescription>
+              {debounced
+                ? 'No encontramos pacientes con ese dato.'
+                : 'Se cargan solos cuando sacan turno por WhatsApp, o con "Nuevo paciente".'}
+            </EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
@@ -123,6 +123,18 @@ export function PatientSearch() {
               ))}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {rows.length >= limit && limit < 200 && (
+        <div className='flex justify-center'>
+          <Button
+            variant='outline'
+            disabled={search.isFetching}
+            onClick={() => setLimit((current) => Math.min(current + PAGE, 200))}
+          >
+            {search.isFetching ? 'Cargando…' : 'Ver más'}
+          </Button>
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import {
   getAppointments,
   getDoctors,
@@ -54,6 +54,14 @@ export const slotsQueryOptions = (doctorId: string, serviceId: string, date: str
     queryFn: () => getDoctorSlots(doctorId, serviceId, date),
     enabled: !!doctorId && !!serviceId && !!date,
     staleTime: 0
+  });
+
+/** Pantalla Pacientes: lista desde el primer momento y se filtra al escribir. */
+export const patientListQueryOptions = (q: string, limit: number) =>
+  queryOptions({
+    queryKey: [...patientKeys.all, 'list', q, limit] as const,
+    queryFn: () => searchPatients(q, limit),
+    placeholderData: keepPreviousData
   });
 
 export const patientSearchQueryOptions = (q: string) =>

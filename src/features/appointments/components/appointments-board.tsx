@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger
@@ -273,22 +274,24 @@ function AppointmentActions({ appointment }: { appointment: Appointment }) {
           <Icons.ellipsis />
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
-          <DropdownMenuLabel>Turno</DropdownMenuLabel>
-          <DropdownMenuItem
-            disabled={closed}
-            onClick={() => update.mutate({ id: appointment.id, status: 'attended' })}
-          >
-            <Icons.circleCheck className='mr-2 h-4 w-4' /> Asistió
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            disabled={closed}
-            onClick={() => update.mutate({ id: appointment.id, status: 'no_show' })}
-          >
-            <Icons.close className='mr-2 h-4 w-4' /> No vino
-          </DropdownMenuItem>
-          <DropdownMenuItem disabled={closed} onClick={() => setCancelOpen(true)}>
-            <Icons.xCircle className='mr-2 h-4 w-4' /> Cancelar
-          </DropdownMenuItem>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Turno</DropdownMenuLabel>
+            <DropdownMenuItem
+              disabled={closed}
+              onClick={() => update.mutate({ id: appointment.id, status: 'attended' })}
+            >
+              <Icons.circleCheck className='mr-2 h-4 w-4' /> Asistió
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={closed}
+              onClick={() => update.mutate({ id: appointment.id, status: 'no_show' })}
+            >
+              <Icons.close className='mr-2 h-4 w-4' /> No vino
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={closed} onClick={() => setCancelOpen(true)}>
+              <Icons.xCircle className='mr-2 h-4 w-4' /> Cancelar
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </>
