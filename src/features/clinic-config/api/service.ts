@@ -1,5 +1,7 @@
 import { apiClient } from '@/lib/api-client';
 import type {
+  ClinicInfo,
+  ClinicInfoPayload,
   ConfigDoctor,
   ConfigService,
   DoctorPayload,
@@ -42,3 +44,8 @@ export const updateService = (id: string, payload: ServicePayload) =>
 
 export const replaceSchedule = (doctorId: string, rules: ScheduleRule[]) =>
   apiClient<ScheduleResult>(`${BASE}/doctors/${doctorId}/schedule`, json('PUT', { rules }));
+
+export const getClinicInfo = () => apiClient<ClinicInfo>(`${BASE}/clinic`);
+
+export const updateClinicInfo = (payload: ClinicInfoPayload) =>
+  apiClient<ClinicInfo>(`${BASE}/clinic`, json('PATCH', payload));

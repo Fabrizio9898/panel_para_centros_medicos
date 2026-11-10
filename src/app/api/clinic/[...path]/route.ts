@@ -9,6 +9,12 @@ const ALLOWED: { method: string; pattern: RegExp }[] = [
   { method: 'POST', pattern: /^admin\/team\/invitations$/ },
   { method: 'DELETE', pattern: new RegExp(`^admin\\/team\\/invitations\\/${UUID}$`) },
   { method: 'DELETE', pattern: new RegExp(`^admin\\/team\\/members\\/${UUID}$`) },
+  { method: 'GET', pattern: /^admin\/config\/clinic$/ },
+  { method: 'PATCH', pattern: /^admin\/config\/clinic$/ },
+  { method: 'GET', pattern: /^admin\/closures$/ },
+  { method: 'POST', pattern: /^admin\/closures$/ },
+  { method: 'DELETE', pattern: new RegExp(`^admin\\/closures\\/${UUID}$`) },
+  { method: 'POST', pattern: new RegExp(`^admin\\/appointments\\/${UUID}\\/reschedule$`) },
   { method: 'GET', pattern: /^admin\/config\/(specialties|doctors)$/ },
   { method: 'POST', pattern: /^admin\/config\/(specialties|doctors)$/ },
   {

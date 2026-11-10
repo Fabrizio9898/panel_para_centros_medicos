@@ -3,6 +3,9 @@ import type {
   Appointment,
   AppointmentFilters,
   AppointmentStatusUpdate,
+  Closure,
+  CreateClosurePayload,
+  CreateClosureResponse,
   CreateAppointmentPayload,
   CreateTimeOffPayload,
   CreateTimeOffResponse,
@@ -88,4 +91,26 @@ export async function createTimeOff(payload: CreateTimeOffPayload) {
 
 export async function deleteTimeOff(id: string) {
   return apiClient<void>(`/clinic/admin/time-offs/${id}`, { method: 'DELETE' });
+}
+
+export async function rescheduleAppointment(id: string, startsAt: string) {
+  return apiClient<Appointment>(`/clinic/admin/appointments/${id}/reschedule`, {
+    method: 'POST',
+    body: JSON.stringify({ startsAt })
+  });
+}
+
+export async function getClosures() {
+  return apiClient<Closure[]>('/clinic/admin/closures');
+}
+
+export async function createClosure(payload: CreateClosurePayload) {
+  return apiClient<CreateClosureResponse>('/clinic/admin/closures', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteClosure(id: string) {
+  return apiClient<void>(`/clinic/admin/closures/${id}`, { method: 'DELETE' });
 }

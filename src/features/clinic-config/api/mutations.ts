@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { isApiError } from '@/lib/api-client';
+import { meKeys } from '@/features/account/api/queries';
 import { doctorsKeys, slotKeys } from '@/features/appointments/api/queries';
 import { configKeys } from './queries';
 import {
@@ -10,10 +11,11 @@ import {
   deleteSpecialty,
   renameSpecialty,
   replaceSchedule,
+  updateClinicInfo,
   updateDoctor,
   updateService
 } from './service';
-import type { DoctorPayload, ScheduleRule, ServicePayload } from './types';
+import type { ClinicInfoPayload, DoctorPayload, ScheduleRule, ServicePayload } from './types';
 
 /** Estos endpoints responden en español (DTOs y servicio), salvo errores inesperados. */
 function message(error: unknown, fallback: string) {
@@ -131,5 +133,19 @@ export function useReplaceSchedule() {
       }
     },
     onError: (error) => toast.error(message(error, 'No se pudo guardar el horario'))
+  });
+}
+
+export function useUpdateClinicInfo() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: ClinicInfoPayload) => updateClinicInfo(payload),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: configKeys.clinic() });
+      // /users/me trae el nombre de la clínica.
+      void queryClient.invalidateQueries({ queryKey: meKeys.all });
+      toast.success('Datos del centro guardados');
+    },
+    onError: (error) => toast.error(message(error, 'No se pudieron guardar los datos'))
   });
 }

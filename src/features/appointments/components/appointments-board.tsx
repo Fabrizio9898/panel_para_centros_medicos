@@ -41,6 +41,7 @@ import type { Appointment } from '../api/types';
 import { CLOSED_STATUSES, STATUS_OPTIONS } from '../constants';
 import { addDaysLocal, rangeFor, todayLocal } from '../date-utils';
 import { NewAppointmentDialog } from './new-appointment-dialog';
+import { RescheduleDialog } from './reschedule-dialog';
 import { StatusBadge } from './status-badge';
 
 export function AppointmentsBoard() {
@@ -249,6 +250,7 @@ export function AppointmentsBoard() {
 
 function AppointmentActions({ appointment }: { appointment: Appointment }) {
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const update = useUpdateAppointmentStatus();
   const closed = CLOSED_STATUSES.includes(appointment.status);
 
@@ -288,12 +290,19 @@ function AppointmentActions({ appointment }: { appointment: Appointment }) {
             >
               <Icons.close className='mr-2 h-4 w-4' /> No vino
             </DropdownMenuItem>
+            <DropdownMenuItem disabled={closed} onClick={() => setRescheduleOpen(true)}>
+              <Icons.calendar className='mr-2 h-4 w-4' /> Reprogramar
+            </DropdownMenuItem>
             <DropdownMenuItem disabled={closed} onClick={() => setCancelOpen(true)}>
               <Icons.xCircle className='mr-2 h-4 w-4' /> Cancelar
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+      <RescheduleDialog
+        appointment={rescheduleOpen ? appointment : null}
+        onClose={() => setRescheduleOpen(false)}
+      />
     </>
   );
 }

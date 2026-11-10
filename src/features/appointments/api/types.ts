@@ -88,3 +88,10 @@ export type CreateTimeOffPayload = {
 };
 
 export type CreateTimeOffResponse = TimeOff & { affectedAppointments: number };
+
+/** Cierre del centro completo (feriado). Fechas ya en dd/MM/yyyy de la clínica. */
+export type Closure = { id: string; startDate: string; endDate: string; reason: string | null };
+
+export type CreateClosurePayload = { startDate: string; endDate: string; reason?: string };
+
+export type CreateClosureResponse = Closure & { affectedAppointments: number };

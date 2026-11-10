@@ -1,10 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { isApiError } from '@/lib/api-client';
-import { appointmentKeys, patientKeys, slotKeys, timeOffKeys } from './queries';
+import { appointmentKeys, closureKeys, patientKeys, slotKeys, timeOffKeys } from './queries';
 import {
   createAppointment,
+  createClosure,
   createPatient,
+  deleteClosure,
+  rescheduleAppointment,
   createTimeOff,
   deleteTimeOff,
   updateAppointmentStatus,
@@ -13,6 +16,7 @@ import {
 import type {
   AppointmentStatusUpdate,
   CreateAppointmentPayload,
+  CreateClosurePayload,
   CreateTimeOffPayload,
   PatientPayload
 } from './types';
@@ -116,5 +120,57 @@ export function useDeleteTimeOff() {
       toast.success('Ausencia eliminada');
     },
     onError: (error) => toast.error(mutationErrorMessage(error, 'No se pudo eliminar la ausencia'))
+  });
+}
+
+export function useRescheduleAppointment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, startsAt }: { id: string; startsAt: string }) =>
+      rescheduleAppointment(id, startsAt),
+    onSuccess: (appointment) => {
+      void queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+      void queryClient.invalidateQueries({ queryKey: patientKeys.all });
+      void queryClient.invalidateQueries({ queryKey: slotKeys.all });
+      toast.success(`Turno reprogramado: ${appointment.localDate} ${appointment.localTime}`);
+    },
+    onError: (error) => {
+      if (isApiError(error) && error.status === 409) {
+        void queryClient.invalidateQueries({ queryKey: slotKeys.all });
+      }
+      toast.error(backendMessage(error, 'No se pudo reprogramar el turno'));
+    }
+  });
+}
+
+export function useCreateClosure() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateClosurePayload) => createClosure(payload),
+    onSuccess: ({ affectedAppointments: n }) => {
+      void queryClient.invalidateQueries({ queryKey: closureKeys.all });
+      void queryClient.invalidateQueries({ queryKey: slotKeys.all });
+      if (n > 0) {
+        toast.warning(
+          `Cierre cargado. ${n === 1 ? 'Hay 1 turno reservado' : `Hay ${n} turnos reservados`} esos días.`
+        );
+      } else {
+        toast.success('Cierre cargado');
+      }
+    },
+    onError: (error) => toast.error(backendMessage(error, 'No se pudo cargar el cierre'))
+  });
+}
+
+export function useDeleteClosure() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteClosure(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: closureKeys.all });
+      void queryClient.invalidateQueries({ queryKey: slotKeys.all });
+      toast.success('Cierre eliminado');
+    },
+    onError: (error) => toast.error(backendMessage(error, 'No se pudo eliminar el cierre'))
   });
 }

@@ -7,6 +7,7 @@ import { Empty, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { meQueryOptions } from '@/features/account/api/queries';
+import { ClinicInfoTab } from './clinic-info-tab';
 import { DoctorsTab } from './doctors-tab';
 import { SpecialtiesTab } from './specialties-tab';
 
@@ -30,12 +31,16 @@ export function ConfigPage() {
           <TabsList>
             <TabsTrigger value='medicos'>Médicos</TabsTrigger>
             <TabsTrigger value='especialidades'>Especialidades</TabsTrigger>
+            <TabsTrigger value='centro'>Centro</TabsTrigger>
           </TabsList>
           <TabsContent value='medicos' className='pt-4'>
             <DoctorsTab />
           </TabsContent>
           <TabsContent value='especialidades' className='pt-4'>
             <SpecialtiesTab />
+          </TabsContent>
+          <TabsContent value='centro' className='pt-4'>
+            <ClinicInfoTab />
           </TabsContent>
         </Tabs>
       )}

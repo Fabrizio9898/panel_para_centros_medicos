@@ -25,3 +25,7 @@ export type DoctorPayload = {
 export type ServicePayload = { name?: string; durationMin?: number; active?: boolean };
 
 export type ScheduleResult = { schedule: ScheduleRule[]; appointmentsOutsideHours: number };
+
+export type ClinicInfo = { name: string; address: string | null; phone: string | null };
+
+export type ClinicInfoPayload = { name: string; address: string; phone: string };

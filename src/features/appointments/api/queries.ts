@@ -1,6 +1,7 @@
 import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 import {
   getAppointments,
+  getClosures,
   getDoctors,
   getDoctorSlots,
   getPatientHistory,
@@ -83,3 +84,8 @@ export const timeOffsQueryOptions = (from: string, to: string) =>
     queryKey: timeOffKeys.list(from, to),
     queryFn: () => getTimeOffs(from, to)
   });
+
+export const closureKeys = { all: ['closures'] as const };
+
+export const closuresQueryOptions = () =>
+  queryOptions({ queryKey: closureKeys.all, queryFn: getClosures });
