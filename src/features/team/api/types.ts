@@ -20,6 +20,8 @@ export interface TeamInvitation {
   expiresAt: string;
   expired: boolean;
   invitedByEmail: string | null;
+  /** Link de registro para mandar por WhatsApp. Null si venció o no hay. */
+  inviteUrl: string | null;
 }
 
 export interface TeamOverview {

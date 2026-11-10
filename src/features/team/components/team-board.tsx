@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { QueryError } from '@/components/feedback/query-error';
+import { toast } from 'sonner';
 import { AlertModal } from '@/components/modal/alert-modal';
+import { Icons } from '@/components/icons';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,6 +22,24 @@ import { formatClinicDate } from '@/features/appointments/date-utils';
 import { useInviteMember, useRemoveMember, useRevokeInvitation } from '../api/mutations';
 import { teamQueryOptions } from '../api/queries';
 import type { TeamInvitation, TeamMember } from '../api/types';
+
+/** Para mandar la invitación por WhatsApp cuando el mail cae en spam. */
+export async function copyInviteLink(url: string) {
+  try {
+    await navigator.clipboard.writeText(url);
+    toast.success('Link copiado. Pegalo en WhatsApp.');
+  } catch {
+    toast.error('No se pudo copiar el link');
+  }
+}
+
+function CopyLinkButton({ url }: { url: string }) {
+  return (
+    <Button variant='outline' size='sm' className='mr-1' onClick={() => void copyInviteLink(url)}>
+      <Icons.share className='mr-1 h-4 w-4' /> Copiar link
+    </Button>
+  );
+}
 
 export function TeamBoard() {
   const team = useQuery(teamQueryOptions());
@@ -119,7 +139,8 @@ export function TeamBoard() {
                       <span className='mr-2'>{formatClinicDate(invitation.expiresAt)}</span>
                       {invitation.expired && <Badge variant='destructive'>Vencida</Badge>}
                     </TableCell>
-                    <TableCell className='text-right'>
+                    <TableCell className='text-right whitespace-nowrap'>
+                      {invitation.inviteUrl && <CopyLinkButton url={invitation.inviteUrl} />}
                       <Button
                         variant='ghost'
                         size='sm'

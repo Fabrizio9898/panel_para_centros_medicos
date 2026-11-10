@@ -15,9 +15,23 @@ export function useInviteMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: InvitePayload) => inviteMember(payload),
-    onSuccess: (_data, { email }) => {
+    onSuccess: (invitation, { email }) => {
       void queryClient.invalidateQueries({ queryKey: teamKeys.all });
-      toast.success(`Invitación enviada a ${email}`);
+      const url = invitation.inviteUrl;
+      toast.success(`Invitación enviada a ${email}`, {
+        description: url ? 'Si el mail no llega, mandale el link por WhatsApp.' : undefined,
+        action: url
+          ? {
+              label: 'Copiar link',
+              onClick: () => {
+                navigator.clipboard.writeText(url).then(
+                  () => toast.success('Link copiado. Pegalo en WhatsApp.'),
+                  () => toast.error('No se pudo copiar el link')
+                );
+              }
+            }
+          : undefined
+      });
     },
     onError: (error) => toast.error(errorMessage(error, 'No se pudo enviar la invitación'))
   });
