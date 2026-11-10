@@ -1,9 +1,14 @@
 import { backendFetch } from '@/lib/backend';
 import type { NextRequest } from 'next/server';
 
-const UUID = '[0-9a-fA-F-]{36}';
+const UUID = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
 
 const ALLOWED: { method: string; pattern: RegExp }[] = [
+  { method: 'GET', pattern: /^users\/me$/ },
+  { method: 'GET', pattern: /^admin\/team$/ },
+  { method: 'POST', pattern: /^admin\/team\/invitations$/ },
+  { method: 'DELETE', pattern: new RegExp(`^admin\\/team\\/invitations\\/${UUID}$`) },
+  { method: 'DELETE', pattern: new RegExp(`^admin\\/team\\/members\\/${UUID}$`) },
   { method: 'GET', pattern: /^admin\/appointments$/ },
   { method: 'GET', pattern: /^admin\/patients$/ },
   { method: 'GET', pattern: new RegExp(`^admin\\/patients\\/${UUID}\\/appointments$`) },

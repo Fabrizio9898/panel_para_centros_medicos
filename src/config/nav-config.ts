@@ -40,6 +40,15 @@ export const navGroups: NavGroup[] = [
         shortcut: ['a', 'a'],
         isActive: false,
         items: []
+      },
+      {
+        title: 'Equipo',
+        url: '/dashboard/equipo',
+        icon: 'userPlus',
+        shortcut: ['e', 'e'],
+        isActive: false,
+        access: { permission: 'manage_team' },
+        items: []
       }
     ]
   },

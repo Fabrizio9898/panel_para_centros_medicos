@@ -75,6 +75,7 @@ import {
   IconUser,
   IconUserCircle,
   IconUserEdit,
+  IconUserPlus,
   IconUserX,
   IconUsers,
   IconVideo,
@@ -126,6 +127,7 @@ export const Icons = {
   profile: IconUser,
   employee: IconUserX,
   userPen: IconUserEdit,
+  userPlus: IconUserPlus,
   teams: IconUsers,
 
   // Brand

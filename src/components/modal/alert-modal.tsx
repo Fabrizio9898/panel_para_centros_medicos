@@ -37,7 +37,7 @@ export function AlertModal({
     <Modal title={title} description={description} isOpen={isOpen} onClose={onClose}>
       <div className='flex w-full items-center justify-end space-x-2 pt-6'>
         <Button variant='outline' onClick={onClose}>
-          Cancel
+          Cancelar
         </Button>
         <LoadingButton loading={loading} type='button' variant='destructive' onClick={onConfirm}>
           {confirmLabel}

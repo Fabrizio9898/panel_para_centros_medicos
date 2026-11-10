@@ -1,6 +1,10 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { meQueryOptions } from '@/features/account/api/queries';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@/components/ui/empty';
 import { isApiError } from '@/lib/api-client';
 
@@ -23,8 +27,37 @@ export function PendingActivation() {
   );
 }
 
+function NoPermission() {
+  return (
+    <Empty className='border'>
+      <EmptyHeader>
+        <EmptyTitle>No tenés permiso para ver esto</EmptyTitle>
+      </EmptyHeader>
+    </Empty>
+  );
+}
+
 export function QueryError({ error, onRetry, message }: QueryErrorProps) {
-  if (isApiError(error) && error.status === 403) return <PendingActivation />;
+  const me = useQuery(meQueryOptions());
+  const forbidden = isApiError(error) && error.status === 403;
+  const [verified, setVerified] = useState(false);
+  const { refetch } = me;
+
+  useEffect(() => {
+    if (!forbidden) return;
+    let active = true;
+    void refetch().finally(() => {
+      if (active) setVerified(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [forbidden, refetch]);
+
+  if (forbidden) {
+    if (!verified) return <Skeleton className='h-32 w-full' />;
+    return me.data?.role ? <NoPermission /> : <PendingActivation />;
+  }
 
   const retryable = !isApiError(error) || error.status >= 500;
 

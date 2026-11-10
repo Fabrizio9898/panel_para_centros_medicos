@@ -1,11 +1,13 @@
 'use client';
 import { ClerkProvider } from '@clerk/nextjs';
+import { esES } from '@clerk/localizations';
 import React from 'react';
 import QueryProvider from './query-provider';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
+      localization={esES}
       appearance={{
         variables: {
           colorPrimary: 'var(--primary)',

@@ -28,6 +28,7 @@ import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { navGroups } from '@/config/nav-config';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useClerk, useUser } from '@clerk/nextjs';
+import { useQueryClient } from '@tanstack/react-query';
 import { useFilteredNavGroups } from '@/hooks/use-nav';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -40,6 +41,7 @@ export default function AppSidebar() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const filteredGroups = useFilteredNavGroups(navGroups);
 
   React.useEffect(() => {
@@ -147,7 +149,12 @@ export default function AppSidebar() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  <DropdownMenuItem onClick={() => signOut({ redirectUrl: '/auth/sign-in' })}>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      queryClient.clear();
+                      void signOut({ redirectUrl: '/auth/sign-in' });
+                    }}
+                  >
                     <Icons.logout aria-hidden className='mr-2 h-4 w-4' />
                     Cerrar sesión
                   </DropdownMenuItem>

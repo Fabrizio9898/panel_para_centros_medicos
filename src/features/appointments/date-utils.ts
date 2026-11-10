@@ -31,3 +31,19 @@ export function clinicLocalToIso(value: string): string | null {
   const date = new Date(`${value.length === 16 ? `${value}:00` : value}-03:00`);
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
+
+const clinicDateFormat = new Intl.DateTimeFormat('es-AR', {
+  timeZone: CLINIC_TIMEZONE,
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23'
+});
+
+/** Fecha y hora ISO (UTC) en la zona de la clínica, p. ej. "12/11/2026, 09:30". */
+export function formatClinicDate(iso: string) {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? '—' : clinicDateFormat.format(date);
+}
