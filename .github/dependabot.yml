@@ -1,0 +1,17 @@
+# Propone actualizaciones de dependencias una vez por semana, en un solo PR agrupado.
+# El CI las prueba; mergear solo si está en verde.
+version: 2
+updates:
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    groups:
+      menores:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
