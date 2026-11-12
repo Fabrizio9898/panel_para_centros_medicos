@@ -35,7 +35,10 @@ const ALLOWED: { method: string; pattern: RegExp }[] = [
   { method: 'GET', pattern: /^admin\/time-offs$/ },
   { method: 'POST', pattern: /^admin\/time-offs$/ },
   { method: 'DELETE', pattern: new RegExp(`^admin\\/time-offs\\/${UUID}$`) },
-  { method: 'PATCH', pattern: new RegExp(`^admin\\/appointments\\/${UUID}\\/status$`) }
+  { method: 'PATCH', pattern: new RegExp(`^admin\\/appointments\\/${UUID}\\/status$`) },
+  { method: 'GET', pattern: /^admin\/health-insurances(\/report)?$/ },
+  { method: 'POST', pattern: /^admin\/health-insurances$/ },
+  { method: 'PATCH', pattern: new RegExp(`^admin\\/health-insurances\\/${UUID}$`) }
 ];
 
 async function handle(req: NextRequest, ctx: { params: Promise<{ path: string[] }> }) {

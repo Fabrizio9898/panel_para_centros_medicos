@@ -34,6 +34,14 @@ export const navGroups: NavGroup[] = [
         items: []
       },
       {
+        title: 'Obras sociales',
+        url: '/dashboard/obras-sociales',
+        icon: 'insurance',
+        shortcut: ['o', 'o'],
+        isActive: false,
+        items: []
+      },
+      {
         title: 'Ausencias',
         url: '/dashboard/ausencias',
         icon: 'clock',

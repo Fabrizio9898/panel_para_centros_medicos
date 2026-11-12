@@ -1,3 +1,5 @@
+import type { Coverage } from '@/features/health-insurances/api/types';
+
 export type AppointmentStatus = 'pending' | 'confirmed' | 'cancelled' | 'attended' | 'no_show';
 
 export type Appointment = {
@@ -12,6 +14,10 @@ export type Appointment = {
   patient: { id: string; name: string; phone: string; dni: string | null };
   doctor: { id: string; name: string };
   service: { id: string; name: string; durationMin: number };
+  /** Cobertura con la que se dio el turno. null = particular. */
+  coverage: Coverage;
+  /** Seña (pago simulado del bot): null = no se pidió, 'pending' = link enviado, 'paid' = pagada. */
+  paymentStatus?: 'pending' | 'paid' | null;
 };
 
 export type AppointmentStatusUpdate = Extract<
@@ -53,13 +59,22 @@ export type CreateAppointmentPayload = {
   notes?: string;
 };
 
-export type PatientPayload = { name: string; phone: string; dni?: string | null };
+export type PatientPayload = {
+  name: string;
+  phone: string;
+  dni?: string | null;
+  /** null = particular. */
+  healthInsuranceId?: string | null;
+  insuranceMemberNumber?: string | null;
+};
 
 export type Patient = {
   id: string;
   name: string;
   phone: string;
   dni: string | null;
+  /** null = particular. */
+  coverage: Coverage;
 };
 
 export type PatientHistory = {

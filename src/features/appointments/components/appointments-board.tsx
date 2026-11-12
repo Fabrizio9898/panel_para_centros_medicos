@@ -42,7 +42,8 @@ import { CLOSED_STATUSES, STATUS_OPTIONS } from '../constants';
 import { addDaysLocal, rangeFor, todayLocal } from '../date-utils';
 import { NewAppointmentDialog } from './new-appointment-dialog';
 import { RescheduleDialog } from './reschedule-dialog';
-import { StatusBadge } from './status-badge';
+import { PaidBadge, StatusBadge } from './status-badge';
+import { coverageLabel } from '@/features/health-insurances/coverage-label';
 
 export function AppointmentsBoard() {
   const [filters, setFilters] = useQueryStates({
@@ -131,7 +132,7 @@ export function AppointmentsBoard() {
             setFilters({ doctorId: !value || value === 'all' ? null : value })
           }
         >
-          <SelectTrigger className='w-[210px]'>
+          <SelectTrigger className='w-full sm:w-[210px]'>
             <SelectValue placeholder='Todos los médicos' />
           </SelectTrigger>
           <SelectContent>
@@ -151,7 +152,7 @@ export function AppointmentsBoard() {
             setFilters({ status: !value || value === 'all' ? null : value })
           }
         >
-          <SelectTrigger className='w-[170px]'>
+          <SelectTrigger className='w-full sm:w-[170px]'>
             <SelectValue placeholder='Todos los estados' />
           </SelectTrigger>
           <SelectContent>
@@ -167,8 +168,8 @@ export function AppointmentsBoard() {
         <Button variant='outline' size='sm' onClick={() => setFilters({ date: todayLocal() })}>
           Hoy
         </Button>
-        <span className='text-muted-foreground ml-auto text-sm capitalize'>{dateLabel}</span>
-        <Button size='sm' onClick={() => setNewOpen(true)}>
+        <span className='text-muted-foreground text-sm capitalize sm:ml-auto'>{dateLabel}</span>
+        <Button size='sm' className='ml-auto sm:ml-0' onClick={() => setNewOpen(true)}>
           <Icons.add className='mr-1 h-4 w-4' /> Nuevo turno
         </Button>
       </div>
@@ -203,46 +204,86 @@ export function AppointmentsBoard() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className='overflow-x-auto rounded-lg border'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {view === 'week' && <TableHead>Fecha</TableHead>}
-                <TableHead>Hora</TableHead>
-                <TableHead>Paciente</TableHead>
-                <TableHead>Médico</TableHead>
-                <TableHead>Servicio</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className='w-10' />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((appointment) => (
-                <TableRow key={appointment.id}>
-                  {view === 'week' && <TableCell>{appointment.localDate}</TableCell>}
-                  <TableCell className='font-medium tabular-nums'>
-                    {appointment.localTime}
-                  </TableCell>
-                  <TableCell>
-                    <div className='font-medium'>{appointment.patient.name}</div>
-                    <div className='text-muted-foreground text-xs'>
-                      {appointment.patient.phone}
-                      {appointment.patient.dni ? ` · DNI ${appointment.patient.dni}` : ''}
+        <>
+          <ul className='flex flex-col gap-2 md:hidden' aria-label='Turnos'>
+            {rows.map((appointment) => (
+              <li key={appointment.id} className='rounded-lg border p-3'>
+                <div className='flex items-start justify-between gap-2'>
+                  <div className='min-w-0 flex-1'>
+                    <div className='flex flex-wrap items-center gap-2'>
+                      <span className='font-semibold tabular-nums'>
+                        {view === 'week' && `${appointment.localDate.slice(0, 5)} `}
+                        {appointment.localTime}
+                      </span>
+                      <StatusBadge status={appointment.status} />
+                      <PaidBadge paymentStatus={appointment.paymentStatus} />
                     </div>
-                  </TableCell>
-                  <TableCell>{appointment.doctor.name}</TableCell>
-                  <TableCell>{appointment.service.name}</TableCell>
-                  <TableCell>
-                    <StatusBadge status={appointment.status} />
-                  </TableCell>
-                  <TableCell>
-                    <AppointmentActions appointment={appointment} />
-                  </TableCell>
+                    <div className='mt-1 font-medium break-words'>{appointment.patient.name}</div>
+                    <div className='text-muted-foreground text-xs'>
+                      {appointment.doctor.name} · {appointment.service.name}
+                    </div>
+                    <div className='text-muted-foreground text-xs'>
+                      <a
+                        href={`tel:${appointment.patient.phone}`}
+                        className='underline-offset-2 hover:underline'
+                      >
+                        {appointment.patient.phone}
+                      </a>
+                      {` · ${coverageLabel(appointment.coverage)}`}
+                    </div>
+                  </div>
+                  <AppointmentActions appointment={appointment} />
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className='hidden overflow-x-auto rounded-lg border md:block'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {view === 'week' && <TableHead>Fecha</TableHead>}
+                  <TableHead>Hora</TableHead>
+                  <TableHead>Paciente</TableHead>
+                  <TableHead>Médico</TableHead>
+                  <TableHead>Servicio</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className='w-10' />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {rows.map((appointment) => (
+                  <TableRow key={appointment.id}>
+                    {view === 'week' && <TableCell>{appointment.localDate}</TableCell>}
+                    <TableCell className='font-medium tabular-nums'>
+                      {appointment.localTime}
+                    </TableCell>
+                    <TableCell>
+                      <div className='font-medium'>{appointment.patient.name}</div>
+                      <div className='text-muted-foreground text-xs'>
+                        {appointment.patient.phone}
+                        {appointment.patient.dni ? ` · DNI ${appointment.patient.dni}` : ''}
+                      </div>
+                      <div className='text-muted-foreground text-xs'>
+                        {coverageLabel(appointment.coverage)}
+                      </div>
+                    </TableCell>
+                    <TableCell>{appointment.doctor.name}</TableCell>
+                    <TableCell>{appointment.service.name}</TableCell>
+                    <TableCell>
+                      <div className='flex flex-wrap items-center gap-1'>
+                        <StatusBadge status={appointment.status} />
+                        <PaidBadge paymentStatus={appointment.paymentStatus} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <AppointmentActions appointment={appointment} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       )}
     </div>
   );

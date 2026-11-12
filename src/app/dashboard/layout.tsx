@@ -30,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           Saltar al contenido
         </a>
         <AppSidebar />
-        <SidebarInset id='main-content' tabIndex={-1} className='scroll-mt-16'>
+        <SidebarInset id='main-content' tabIndex={-1} className='min-w-0 scroll-mt-16'>
           <Header />
           <InfobarProvider defaultOpen={false}>
             {children}

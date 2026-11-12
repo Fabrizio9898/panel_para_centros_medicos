@@ -13,3 +13,8 @@ const VARIANTS: Record<AppointmentStatus, 'default' | 'secondary' | 'outline' | 
 export function StatusBadge({ status }: { status: AppointmentStatus }) {
   return <Badge variant={VARIANTS[status]}>{STATUS_LABELS[status]}</Badge>;
 }
+
+export function PaidBadge({ paymentStatus }: { paymentStatus?: string | null }) {
+  if (paymentStatus !== 'paid') return null;
+  return <Badge variant='outline'>Seña pagada</Badge>;
+}

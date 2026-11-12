@@ -19,6 +19,12 @@
     @apply bg-background text-foreground;
   }
 
+  /* Diálogos largos (Nuevo turno) en pantallas chicas: scroll adentro, no cortados. */
+  [data-slot='dialog-content'] {
+    max-height: calc(100svh - 2rem);
+    overflow-y: auto;
+  }
+
   /* Global scrollbar styling to match ScrollArea */
   * {
     scrollbar-width: thin;

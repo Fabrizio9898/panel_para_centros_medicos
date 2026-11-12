@@ -9,6 +9,7 @@ const SEGMENT_TITLES: Record<string, string> = {
   turnos: 'Turnos',
   pacientes: 'Pacientes',
   ausencias: 'Ausencias',
+  'obras-sociales': 'Obras sociales',
   equipo: 'Equipo',
   configuracion: 'Configuración',
   profile: 'Perfil'

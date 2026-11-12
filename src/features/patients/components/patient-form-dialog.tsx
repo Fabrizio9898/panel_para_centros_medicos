@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,6 +16,10 @@ import { LoadingButton } from '@/components/ui/loading-button';
 import { useAppForm } from '@/lib/form';
 import { useSavePatient } from '@/features/appointments/api/mutations';
 import type { Patient } from '@/features/appointments/api/types';
+import { healthInsurancesQueryOptions } from '@/features/health-insurances/api/queries';
+
+/** Valor del select para "sin obra social". */
+const PRIVATE = 'particular';
 
 const patientSchema = z.object({
   name: z.string().trim().min(2, 'Ingresá el nombre del paciente'),
@@ -28,7 +33,9 @@ const patientSchema = z.object({
     .refine(
       (v) => v === '' || /^\d{6,10}$/.test(v.replace(/[.\s-]/g, '')),
       'El DNI tiene que tener entre 6 y 10 números'
-    )
+    ),
+  healthInsuranceId: z.string(),
+  insuranceMemberNumber: z.string().trim().max(40, 'El número de afiliado es demasiado largo')
 });
 
 type PatientFormValues = z.infer<typeof patientSchema>;
@@ -44,12 +51,21 @@ export type PatientFormDialogProps = {
 };
 
 function initialValues(patient?: Patient | null, initialQuery = ''): PatientFormValues {
-  if (patient) return { name: patient.name, phone: patient.phone, dni: patient.dni ?? '' };
+  if (patient)
+    return {
+      name: patient.name,
+      phone: patient.phone,
+      dni: patient.dni ?? '',
+      healthInsuranceId: patient.coverage?.healthInsuranceId ?? PRIVATE,
+      insuranceMemberNumber: patient.coverage?.memberNumber ?? ''
+    };
   const looksLikePhone = /^[\d\s()+-]{6,}$/.test(initialQuery.trim());
   return {
     name: looksLikePhone ? '' : initialQuery.trim(),
     phone: looksLikePhone ? initialQuery.trim() : '',
-    dni: ''
+    dni: '',
+    healthInsuranceId: PRIVATE,
+    insuranceMemberNumber: ''
   };
 }
 
@@ -61,7 +77,15 @@ export function PatientFormDialog({
   onSaved
 }: PatientFormDialogProps) {
   const save = useSavePatient();
+  const insurances = useQuery({ ...healthInsurancesQueryOptions(), enabled: open });
   const editing = !!patient;
+  // Activas, más la actual del paciente aunque esté dada de baja (para no perderla al editar).
+  const insuranceOptions = [
+    { value: PRIVATE, label: 'Particular (sin obra social)' },
+    ...(insurances.data ?? [])
+      .filter((i) => i.active || i.id === patient?.coverage?.healthInsuranceId)
+      .map((i) => ({ value: i.id, label: i.active ? i.name : `${i.name} (dada de baja)` }))
+  ];
 
   const form = useAppForm({
     defaultValues: initialValues(patient, initialQuery),
@@ -72,7 +96,10 @@ export function PatientFormDialog({
         payload: {
           name: value.name.trim(),
           phone: value.phone.trim(),
-          dni: value.dni.trim() === '' ? (editing ? null : undefined) : value.dni.trim()
+          dni: value.dni.trim() === '' ? (editing ? null : undefined) : value.dni.trim(),
+          healthInsuranceId: value.healthInsuranceId === PRIVATE ? null : value.healthInsuranceId,
+          insuranceMemberNumber:
+            value.healthInsuranceId === PRIVATE ? null : value.insuranceMemberNumber.trim() || null
         }
       });
       onSaved?.(saved);
@@ -124,6 +151,28 @@ export function PatientFormDialog({
                 <field.TextField label='DNI' inputMode='numeric' autoComplete='off' />
               )}
             />
+            <form.AppField
+              name='healthInsuranceId'
+              children={(field) => (
+                <field.SelectField
+                  label='Obra social'
+                  placeholder='Elegí una opción'
+                  options={insuranceOptions}
+                />
+              )}
+            />
+            <form.Subscribe selector={(state) => state.values.healthInsuranceId}>
+              {(healthInsuranceId) =>
+                healthInsuranceId !== PRIVATE && (
+                  <form.AppField
+                    name='insuranceMemberNumber'
+                    children={(field) => (
+                      <field.TextField label='N° de afiliado' autoComplete='off' />
+                    )}
+                  />
+                )
+              }
+            </form.Subscribe>
           </FieldGroup>
         </form>
         <DialogFooter>

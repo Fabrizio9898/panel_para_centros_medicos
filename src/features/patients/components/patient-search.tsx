@@ -31,6 +31,7 @@ import {
 } from '@/features/appointments/api/queries';
 import type { Patient } from '@/features/appointments/api/types';
 import { PatientFormDialog } from './patient-form-dialog';
+import { coverageLabel } from '@/features/health-insurances/coverage-label';
 
 const PAGE = 50;
 
@@ -88,42 +89,86 @@ export function PatientSearch() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <div className='overflow-x-auto rounded-lg border'>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Teléfono</TableHead>
-                <TableHead>DNI</TableHead>
-                <TableHead className='w-40' />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {rows.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell className='font-medium'>{patient.name}</TableCell>
-                  <TableCell>{patient.phone}</TableCell>
-                  <TableCell>{patient.dni ?? '—'}</TableCell>
-                  <TableCell>
-                    <div className='flex justify-end gap-2'>
-                      <Button
-                        variant='ghost'
-                        size='sm'
-                        onClick={() => setEditing({ patient })}
-                        aria-label={`Editar ${patient.name}`}
-                      >
-                        <Icons.edit className='h-4 w-4' />
-                      </Button>
-                      <Button variant='outline' size='sm' onClick={() => setSelected(patient)}>
-                        Ver historial
-                      </Button>
-                    </div>
-                  </TableCell>
+        <>
+          <ul className='flex flex-col gap-2 md:hidden' aria-label='Pacientes'>
+            {rows.map((patient) => (
+              <li key={patient.id} className='rounded-lg border p-3'>
+                <div className='font-medium break-words'>{patient.name}</div>
+                <div className='text-muted-foreground text-xs'>
+                  {patient.phone}
+                  {patient.dni ? ` · DNI ${patient.dni}` : ''}
+                </div>
+                <div className='text-muted-foreground text-xs'>
+                  {coverageLabel(patient.coverage)}
+                </div>
+                <div className='mt-2 flex gap-2'>
+                  <Button
+                    variant='outline'
+                    size='sm'
+                    className='flex-1'
+                    onClick={() => setSelected(patient)}
+                  >
+                    Ver historial
+                  </Button>
+                  <Button variant='outline' size='sm' onClick={() => setEditing({ patient })}>
+                    <Icons.edit className='mr-1 h-4 w-4' /> Editar
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className='hidden overflow-x-auto rounded-lg border md:block'>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Teléfono</TableHead>
+                  <TableHead>DNI</TableHead>
+                  <TableHead>Obra social</TableHead>
+                  <TableHead className='w-40' />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {rows.map((patient) => (
+                  <TableRow key={patient.id}>
+                    <TableCell className='font-medium'>{patient.name}</TableCell>
+                    <TableCell>{patient.phone}</TableCell>
+                    <TableCell>{patient.dni ?? '—'}</TableCell>
+                    <TableCell>
+                      {patient.coverage ? (
+                        <>
+                          <div>{patient.coverage.name}</div>
+                          {patient.coverage.memberNumber && (
+                            <div className='text-muted-foreground text-xs'>
+                              N° {patient.coverage.memberNumber}
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <span className='text-muted-foreground'>Particular</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className='flex justify-end gap-2'>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          onClick={() => setEditing({ patient })}
+                          aria-label={`Editar ${patient.name}`}
+                        >
+                          <Icons.edit className='h-4 w-4' />
+                        </Button>
+                        <Button variant='outline' size='sm' onClick={() => setSelected(patient)}>
+                          Ver historial
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
       )}
 
       {rows.length >= limit && limit < 200 && (
@@ -168,7 +213,9 @@ function PatientHistoryDialog({
           <DialogTitle>{patient?.name}</DialogTitle>
           <DialogDescription>
             {patient?.phone}
-            {patient?.dni ? ` · DNI ${patient.dni}` : ''} · Historial de turnos
+            {patient?.dni ? ` · DNI ${patient.dni}` : ''}
+            {` · ${patient?.coverage ? patient.coverage.name : 'Particular'}`}
+            {patient?.coverage?.memberNumber ? ` N° ${patient.coverage.memberNumber}` : ''}
           </DialogDescription>
         </DialogHeader>
 
@@ -186,30 +233,50 @@ function PatientHistoryDialog({
               message='No se pudo cargar el historial.'
             />
           ) : history.data && history.data.appointments.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Hora</TableHead>
-                  <TableHead>Médico</TableHead>
-                  <TableHead>Servicio</TableHead>
-                  <TableHead>Estado</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <>
+              <ul className='flex flex-col gap-2 md:hidden'>
                 {history.data.appointments.map((appointment) => (
-                  <TableRow key={appointment.id}>
-                    <TableCell>{appointment.localDate}</TableCell>
-                    <TableCell className='tabular-nums'>{appointment.localTime}</TableCell>
-                    <TableCell>{appointment.doctor.name}</TableCell>
-                    <TableCell>{appointment.service.name}</TableCell>
-                    <TableCell>
+                  <li key={appointment.id} className='rounded-lg border p-3'>
+                    <div className='flex flex-wrap items-center justify-between gap-2'>
+                      <span className='font-medium tabular-nums'>
+                        {appointment.localDate} {appointment.localTime}
+                      </span>
                       <StatusBadge status={appointment.status} />
-                    </TableCell>
-                  </TableRow>
+                    </div>
+                    <div className='text-muted-foreground text-xs'>
+                      {appointment.doctor.name} · {appointment.service.name} ·{' '}
+                      {coverageLabel(appointment.coverage)}
+                    </div>
+                  </li>
                 ))}
-              </TableBody>
-            </Table>
+              </ul>
+              <Table className='hidden md:table'>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Hora</TableHead>
+                    <TableHead>Médico</TableHead>
+                    <TableHead>Servicio</TableHead>
+                    <TableHead>Cobertura</TableHead>
+                    <TableHead>Estado</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {history.data.appointments.map((appointment) => (
+                    <TableRow key={appointment.id}>
+                      <TableCell>{appointment.localDate}</TableCell>
+                      <TableCell className='tabular-nums'>{appointment.localTime}</TableCell>
+                      <TableCell>{appointment.doctor.name}</TableCell>
+                      <TableCell>{appointment.service.name}</TableCell>
+                      <TableCell>{coverageLabel(appointment.coverage)}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={appointment.status} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </>
           ) : (
             <Empty className='border'>
               <EmptyHeader>

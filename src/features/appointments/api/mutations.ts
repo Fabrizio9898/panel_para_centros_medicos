@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { isApiError } from '@/lib/api-client';
 import { appointmentKeys, closureKeys, patientKeys, slotKeys, timeOffKeys } from './queries';
+import { insuranceKeys } from '@/features/health-insurances/api/queries';
 import {
   createAppointment,
   createClosure,
@@ -37,6 +38,8 @@ export function useUpdateAppointmentStatus() {
       updateAppointmentStatus(id, status),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
+      // El resumen por obra social cuenta los turnos atendidos.
+      void queryClient.invalidateQueries({ queryKey: insuranceKeys.all });
       toast.success('Turno actualizado');
     },
     onError: (error) => {
@@ -84,6 +87,7 @@ export function useSavePatient() {
       id ? updatePatient(id, payload) : createPatient(payload),
     onSuccess: (patient, { id }) => {
       void queryClient.invalidateQueries({ queryKey: patientKeys.all });
+      void queryClient.invalidateQueries({ queryKey: insuranceKeys.all });
       void queryClient.invalidateQueries({ queryKey: appointmentKeys.all });
       toast.success(id ? 'Paciente actualizado' : `Paciente ${patient.name} cargado`);
     },
